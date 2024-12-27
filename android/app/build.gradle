@@ -1,0 +1,54 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+    id "com.google.gms.google-services"
+}
+
+android {
+    namespace = "com.example.taskme"
+    compileSdk = 34
+    ndkVersion = "25.1.8937393"
+
+    defaultConfig {
+        applicationId = "com.example.taskme"
+        minSdk = 23
+        targetSdk = 34
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+    }
+
+    // Enable Java 17 and optionally desugaring for newer Java APIs
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        // If using AGP below 8.0, you may also need:
+        coreLibraryDesugaringEnabled true
+
+
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.debug
+        }
+    }
+}
+
+// Flutter block
+flutter {
+    source = "../.."
+}
+
+dependencies {
+    // Firebase (BoM and Analytics)
+    implementation platform("com.google.firebase:firebase-bom:33.7.0")
+    implementation "com.google.firebase:firebase-analytics"
+
+    // Desugaring library for Java 8+ APIs on older devices
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
+}
