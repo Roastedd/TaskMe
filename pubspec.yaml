@@ -1,32 +1,11 @@
 name: taskme
 description: "A new Flutter project."
-# The following line prevents the package from being accidentally published to
-# pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-
-# The following defines the version and build number for your application.
-# A version number is three numbers separated by dots, like 1.2.43
-# followed by an optional build number separated by a +.
-# Both the version and the builder number may be overridden in flutter
-# build by specifying --build-name and --build-number, respectively.
-# In Android, build-name is used as versionName while build-number used as versionCode.
-# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
-# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
-# Read more about iOS versioning at
-# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-# In Windows, build-name is used as the major, minor, and patch parts
-# of the product and file versions while build-number is used as the build suffix.
+publish_to: 'none'
 version: 1.0.0+1
 
 environment:
   sdk: ^3.5.0
 
-# Dependencies specify other packages that your package needs in order to work.
-# To automatically upgrade your package dependencies to the latest versions
-# consider running `flutter pub upgrade --major-versions`. Alternatively,
-# dependencies can be manually updated by changing the version numbers below to
-# the latest version available on pub.dev. To see which dependencies have newer
-# versions available, run `flutter pub outdated`.
 dependencies:
   flutter:
     sdk: flutter
@@ -34,7 +13,10 @@ dependencies:
   google_fonts: ^6.2.1
   uuid: ^4.4.0
   intl: ^0.19.0
-  flutter_local_notifications: ^17.1.2
+
+  # Updated to 18.x
+  flutter_local_notifications: ^18.0.1
+
   path_provider: ^2.0.9
   cupertino_icons: ^1.0.2
   fl_chart: ^0.69.0
@@ -51,22 +33,23 @@ dependencies:
   confetti: ^0.7.0
   flutter_staggered_animations: ^1.0.0
   google_sign_in: ^6.2.2
-  firebase_auth: ^4.17.9
-  firebase_core: ^2.27.1
+
+  # Make sure these match the latest versions
+  firebase_auth: ^5.3.4
+  firebase_core: ^3.9.0
+
   googleapis: ^13.1.0
   googleapis_auth: ^1.5.1
   http: ^1.1.0
   flutter_phoenix: ^1.1.1
   social_login_buttons: ^1.0.7
 
-
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
-  flutter_launcher_icons: ^0.13.1
-
+  # You can also update this if you like:
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.2
 
 flutter_launcher_icons:
   android: true
@@ -80,4 +63,3 @@ flutter:
   assets:
     - assets/icon/icon_fore.png
     - assets/alarm.mp3
-
