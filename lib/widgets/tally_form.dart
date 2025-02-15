@@ -21,6 +21,12 @@ class TallyForm extends StatefulWidget {
 class TallyFormState extends State<TallyForm> {
   final _formKey = GlobalKey<FormState>();
   late String _tallyName;
+
+  String? get tallyName => _tallyName;
+
+  String? get tallyName => _tallyName;
+
+  String? get tallyName => _tallyName;
   late String _frequency;
   late int _weeklyFrequency;
   late int _intervalFrequency;
@@ -713,7 +719,7 @@ class TallyFormState extends State<TallyForm> {
                                   value: value,
                                   child: Text(value),
                                 );
-                              }).toList(),
+                                  }).toList(),
                             ),
                           ],
                         ),

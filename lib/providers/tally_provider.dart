@@ -30,7 +30,7 @@ class TallyProvider with ChangeNotifier {
       }
     } catch (e) {
       // Handle the error if necessary
-      print("Error loading tallies: $e");
+      debugPrint("Error loading tallies: $e");
     }
   }
 
@@ -39,9 +39,10 @@ class TallyProvider with ChangeNotifier {
       final file = await _getLocalFile('tallies.json');
       final contents = jsonEncode(_tallies.map((tally) => tally.toJson()).toList());
       await file.writeAsString(contents);
+      print('Tallies saved to file.');
     } catch (e) {
       // Handle the error if necessary
-      print("Error saving tallies: $e");
+      debugPrint("Error saving tallies: $e");
     }
   }
 
@@ -55,7 +56,7 @@ class TallyProvider with ChangeNotifier {
       }
     } catch (e) {
       // Handle the error if necessary
-      print("Error loading preferences: $e");
+      debugPrint("Error loading preferences: $e");
     }
   }
 
@@ -86,6 +87,7 @@ class TallyProvider with ChangeNotifier {
       userProvider.addXp(1);
       await _saveTallies();
       notifyListeners();
+      print('Tally added and saved. Total tallies: ${_tallies.length}');
     }
   }
 
@@ -116,6 +118,7 @@ class TallyProvider with ChangeNotifier {
       );
       await _saveTallies();
       notifyListeners();
+      print('Tally updated and saved. Tally ID: ${tally.id}');
     }
   }
 
@@ -125,6 +128,7 @@ class TallyProvider with ChangeNotifier {
       _tallies[index] = updatedTally;
       await _saveTallies();
       notifyListeners();
+      print('Tally updated and saved. Tally ID: ${updatedTally.id}');
     }
   }
 
@@ -265,7 +269,6 @@ class TallyProvider with ChangeNotifier {
     Map<int, int> yearlyStats = {};
 
     for (var i = 1; i <= 12; i++) {
-      final monthStart = DateTime(now.year, i, 1);
       final daysInMonth = DateTime(now.year, i + 1, 0).day;
       int monthTotal = 0;
 

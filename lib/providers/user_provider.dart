@@ -17,13 +17,13 @@ class UserProvider with ChangeNotifier {
 
   void addXp(int xp) {
     _user.xp += xp;
-    if (_user.xp >= levels[_user.level].xpNeeded) {
+    if (_user.xp >= currentLevel.xpNeeded && _user.level < levels.length) {
       _user.level++;
     }
     notifyListeners();
   }
 
-  bool canAddTask(int currentTasksCount) => currentTasksCount < currentLevel.maxTasks;
+  bool canAddTask(int currentTasksCount) => currentTasksCount < currentLevel.getMaxTasks;
 
-  List<int> get availableColors => currentLevel.availableColors;
+  List<int> get availableColors => currentLevel.getAvailableColors;
 }

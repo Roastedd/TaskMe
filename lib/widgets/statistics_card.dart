@@ -67,7 +67,7 @@ class StatisticsCard extends StatelessWidget {
                             backDrawRodData: BackgroundBarChartRodData(
                               show: true,
                               toY: maxY > 0 ? maxY : 10, // Set a default maxY if it's zero
-                              color: Colors.white.withOpacity(0.3),
+                              color: Colors.white.withValues(alpha: 0.3),
                             ),
                           ),
                         ],
@@ -175,7 +175,7 @@ class StatisticsCard extends StatelessWidget {
                             backDrawRodData: BackgroundBarChartRodData(
                               show: true,
                               toY: maxY > 0 ? maxY : 10, // Set a default maxY if it's zero
-                              color: Colors.white.withOpacity(0.3),
+                              color: Colors.white.withValues(alpha: 0.3),
                             ),
                           ),
                         ],
@@ -287,7 +287,7 @@ class StatisticsCard extends StatelessWidget {
                             backDrawRodData: BackgroundBarChartRodData(
                               show: true,
                               toY: maxY > 0 ? maxY : 10, // Set a default maxY if it's zero
-                              color: Colors.white.withOpacity(0.3),
+                              color: Colors.white.withValues(alpha: 0.3),
                             ),
                           ),
                         ],

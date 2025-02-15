@@ -82,7 +82,7 @@ class SocialAuthProvider with ChangeNotifier {
     final driveApi = await getDriveApi();  // Change _getDriveApi to getDriveApi
     if (driveApi == null) return;
 
-    final jsonData = tallies.map((tally) => tally.toJson()).where((element) => element != null).toList();
+    final jsonData = tallies.map((tally) => tally.toJson()).toList();
     final driveFile = drive.File()
       ..name = 'task_up_backup.json'
       ..parents = ['appDataFolder'];

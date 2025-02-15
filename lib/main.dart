@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'screens/home_screen.dart';
 import 'screens/timer_screen.dart';
+import 'screens/settings_screen.dart'; // Import SettingsScreen
 import 'providers/tally_provider.dart';
 import 'providers/user_provider.dart';
 import 'providers/theme_notifier.dart';
@@ -28,7 +29,8 @@ void main() async {
           ChangeNotifierProvider(create: (context) => SocialAuthProvider()),
           ChangeNotifierProxyProvider<UserProvider, TallyProvider>(
             create: (context) => TallyProvider(context.read<UserProvider>()),
-            update: (context, userProvider, tallyProvider) => tallyProvider!..updateUserProvider(userProvider),
+            update: (context, userProvider, tallyProvider) =>
+                tallyProvider!..updateUserProvider(userProvider),
           ),
           ChangeNotifierProvider(create: (_) => ThemeNotifier()),
         ],
@@ -71,7 +73,8 @@ class MyApp extends StatelessWidget {
         appBarTheme: AppBarTheme(
           backgroundColor: const Color(0xFF0064A0),
           titleTextStyle: GoogleFonts.rubik(
-            textStyle: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),
+            textStyle: const TextStyle(
+                color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),
           ),
           iconTheme: const IconThemeData(color: Colors.white),
         ),
@@ -81,8 +84,10 @@ class MyApp extends StatelessWidget {
           unselectedItemColor: Colors.white,
         ),
         textTheme: TextTheme(
-          bodyLarge: GoogleFonts.rubik(textStyle: const TextStyle(color: Colors.white)),
-          bodyMedium: GoogleFonts.rubik(textStyle: const TextStyle(color: Colors.white)),
+          bodyLarge: GoogleFonts.rubik(
+              textStyle: const TextStyle(color: Colors.white)),
+          bodyMedium: GoogleFonts.rubik(
+              textStyle: const TextStyle(color: Colors.white)),
         ),
       ),
       darkTheme: ThemeData(
@@ -91,7 +96,8 @@ class MyApp extends StatelessWidget {
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.black,
           titleTextStyle: GoogleFonts.rubik(
-            textStyle: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),
+            textStyle: const TextStyle(
+                color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),
           ),
           iconTheme: const IconThemeData(color: Colors.white),
         ),
@@ -101,15 +107,19 @@ class MyApp extends StatelessWidget {
           unselectedItemColor: Colors.white,
         ),
         textTheme: TextTheme(
-          bodyLarge: GoogleFonts.rubik(textStyle: const TextStyle(color: Colors.white)),
-          bodyMedium: GoogleFonts.rubik(textStyle: const TextStyle(color: Colors.white)),
+          bodyLarge: GoogleFonts.rubik(
+              textStyle: const TextStyle(color: Colors.white)),
+          bodyMedium: GoogleFonts.rubik(
+              textStyle: const TextStyle(color: Colors.white)),
         ),
       ),
       themeMode: themeNotifier.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       home: const HomeScreenWrapper(),
       routes: {
+        '/home': (context) => const MyHomePage(title: 'TaskMe'),
+        '/settings': (context) =>
+            const SettingsScreen(), // Use the SettingsScreen widget
         '/timer': (context) => const TimerScreen(),
-        // Removed TestScreen route
       },
     );
   }
@@ -122,7 +132,8 @@ class HomeScreenWrapper extends StatefulWidget {
   _HomeScreenWrapperState createState() => _HomeScreenWrapperState();
 }
 
-class _HomeScreenWrapperState extends State<HomeScreenWrapper> with TickerProviderStateMixin {
+class _HomeScreenWrapperState extends State<HomeScreenWrapper>
+    with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
@@ -131,5 +142,34 @@ class _HomeScreenWrapperState extends State<HomeScreenWrapper> with TickerProvid
   @override
   Widget build(BuildContext context) {
     return const HomeScreen();
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key, required this.title});
+
+  final String title;
+
+  @override
+  State<MyHomePage> createState() => MyHomePageState();
+}
+
+class MyHomePageState extends State<MyHomePage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.pushNamed(context, '/settings');
+            },
+          ),
+        ],
+      ),
+      body: const HomeScreen(),
+    );
   }
 }

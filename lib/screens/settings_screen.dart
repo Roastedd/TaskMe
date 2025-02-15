@@ -22,6 +22,7 @@ class SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
+    if (!mounted) return;
     weekStart = Provider.of<TallyProvider>(context, listen: false).weekStart;
   }
 
@@ -133,6 +134,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                 }
 
                 // Restart the app after restoring data
+                if (!mounted) return;
                 Phoenix.rebirth(context);
               },
               cardColor: cardColor,

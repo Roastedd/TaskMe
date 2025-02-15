@@ -2,20 +2,24 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:logging/logging.dart';
 
-class ThemeNotifier extends ChangeNotifier {
+class ThemeNotifier with ChangeNotifier {
+  final _logger = Logger('ThemeNotifier'); // Create a logger instance
   final String key = "theme";
   bool _isDarkMode = false;
 
   bool get isDarkMode => _isDarkMode;
 
   ThemeNotifier() {
+    _logger.info('Theme Notifier constructed');
     _loadFromPrefs();
   }
 
   void toggleTheme(bool isDark) {
     _isDarkMode = isDark;
     _saveToPrefs();
+    _logger.info('Theme changed');
     notifyListeners();
   }
 
@@ -30,7 +34,7 @@ class ThemeNotifier extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       // Handle the error if necessary
-      print("Error loading theme preferences: $e");
+      _logger.severe("Error loading theme preferences: $e");
     }
   }
 
@@ -41,7 +45,7 @@ class ThemeNotifier extends ChangeNotifier {
       await file.writeAsString(jsonEncode(data));
     } catch (e) {
       // Handle the error if necessary
-      print("Error saving theme preferences: $e");
+      _logger.severe("Error saving theme preferences: $e");
     }
   }
 

@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:logging/logging.dart';
 import '/providers/theme_notifier.dart';
 import '/providers/notification_helper.dart';
 
@@ -15,19 +16,19 @@ class TimerScreen extends StatefulWidget {
 }
 
 class TimerScreenState extends State<TimerScreen> with TickerProviderStateMixin {
+  final _logger = Logger('TimerScreenState'); // Create a logger instance
   Duration _duration = const Duration(hours: 0, minutes: 0, seconds: 0);
   bool _isRunning = false;
   bool _isEditing = false;
   late Duration _remaining;
   List<Duration> _recents = [];
-  final String _label = 'Timer';
-  final String _whenTimerEnds = 'Radial';
   late AnimationController _controller;
   late Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
+    _logger.info('Timer Screen init');
     _remaining = _duration;
     _controller = AnimationController(vsync: this, duration: _duration);
     _animation = Tween<double>(begin: 1.0, end: 0.0).animate(_controller);
@@ -133,7 +134,7 @@ class TimerScreenState extends State<TimerScreen> with TickerProviderStateMixin 
       }
       setState(() {});
     } catch (e) {
-      print("Error loading recents: $e");
+      _logger.severe("Error loading recents: $e");
     }
   }
 
@@ -143,7 +144,7 @@ class TimerScreenState extends State<TimerScreen> with TickerProviderStateMixin 
       final contents = jsonEncode(_recents.map((duration) => duration.inSeconds).toList());
       await file.writeAsString(contents);
     } catch (e) {
-      print("Error saving recents: $e");
+      _logger.severe("Error saving recents: $e");
     }
   }
 
@@ -157,7 +158,6 @@ class TimerScreenState extends State<TimerScreen> with TickerProviderStateMixin 
     final isDarkMode = Provider.of<ThemeNotifier>(context).isDarkMode;
     final backgroundColor = isDarkMode ? Colors.black : const Color(0xFF0064A0);
     const textColor = Colors.white;
-    final cardColor = isDarkMode ? Colors.grey[850]! : const Color(0xFF0088CC);
 
     return Scaffold(
       appBar: AppBar(

@@ -7,6 +7,9 @@ class Level {
   final List<int> availableColors;
 
   Level(this.level, this.xpNeeded, this.maxTasks, this.availableColors);
+
+  int get getMaxTasks => maxTasks;
+  List<int> get getAvailableColors => availableColors;
 }
 
 final List<Level> levels = [
