@@ -24,9 +24,6 @@ class TallyFormState extends State<TallyForm> {
 
   String? get tallyName => _tallyName;
 
-  String? get tallyName => _tallyName;
-
-  String? get tallyName => _tallyName;
   late String _frequency;
   late int _weeklyFrequency;
   late int _intervalFrequency;
@@ -719,7 +716,7 @@ class TallyFormState extends State<TallyForm> {
                                   value: value,
                                   child: Text(value),
                                 );
-                                  }).toList(),
+                              }).toList(),
                             ),
                           ],
                         ),
