@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_notifier.dart';
+import '../providers/user_provider.dart';
 import '../providers/tally_provider.dart';
-import '../providers/social_auth_provider.dart';
 import '../widgets/about_screen.dart';
 import '../screens/help_screen.dart';
-import 'package:flutter_phoenix/flutter_phoenix.dart'; // Add this import
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -15,31 +15,37 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class SettingsScreenState extends State<SettingsScreen> {
-  late String weekStart;
+  late String weekStart = 'Sunday'; // Set default value
   bool notificationsEnabled = true;
   bool soundEnabled = true;
 
   @override
   void initState() {
     super.initState();
-    if (!mounted) return;
-    weekStart = Provider.of<TallyProvider>(context, listen: false).weekStart;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          weekStart = Provider.of<TallyProvider>(context, listen: false).weekStart;
+        });
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final themeNotifier = Provider.of<ThemeNotifier>(context);
-    final socialAuthProvider = Provider.of<SocialAuthProvider>(context);
+    final userProvider = Provider.of<UserProvider>(context);
     final isDarkMode = themeNotifier.isDarkMode;
-    const textColor = Colors.white;
+    final textColor = isDarkMode ? Colors.white : Colors.black;
     final dropdownColor = isDarkMode ? Colors.grey[800] : Colors.white;
     final backgroundColor = isDarkMode ? Colors.black : const Color(0xFF0064A0);
     final cardColor = isDarkMode ? Colors.grey[850]! : const Color(0xFF0088CC);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text('Settings', style: TextStyle(color: textColor)),
         backgroundColor: backgroundColor,
+        iconTheme: IconThemeData(color: textColor),
       ),
       backgroundColor: backgroundColor,
       body: Padding(
@@ -50,7 +56,7 @@ class SettingsScreenState extends State<SettingsScreen> {
               context,
               title: 'Dark Mode',
               trailing: Switch(
-                value: themeNotifier.isDarkMode,
+                value: isDarkMode,
                 onChanged: (value) {
                   themeNotifier.toggleTheme(value);
                 },
@@ -64,7 +70,7 @@ class SettingsScreenState extends State<SettingsScreen> {
               trailing: DropdownButton<String>(
                 value: weekStart,
                 dropdownColor: dropdownColor,
-                style: const TextStyle(color: textColor),
+                style: TextStyle(color: textColor),
                 items: ['Sunday', 'Monday'].map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -72,10 +78,13 @@ class SettingsScreenState extends State<SettingsScreen> {
                   );
                 }).toList(),
                 onChanged: (value) {
-                  setState(() {
-                    weekStart = value!;
-                    Provider.of<TallyProvider>(context, listen: false).setWeekStart(value);
-                  });
+                  if (value != null) {
+                    setState(() {
+                      weekStart = value;
+                      Provider.of<TallyProvider>(context, listen: false)
+                          .setWeekStart(value);
+                    });
+                  }
                 },
               ),
               cardColor: cardColor,
@@ -89,7 +98,6 @@ class SettingsScreenState extends State<SettingsScreen> {
                 onChanged: (value) {
                   setState(() {
                     notificationsEnabled = value;
-                    // Implement notification toggle logic
                   });
                 },
               ),
@@ -104,7 +112,6 @@ class SettingsScreenState extends State<SettingsScreen> {
                 onChanged: (value) {
                   setState(() {
                     soundEnabled = value;
-                    // Implement sound toggle logic
                   });
                 },
               ),
@@ -113,29 +120,13 @@ class SettingsScreenState extends State<SettingsScreen> {
             ),
             _buildSettingCard(
               context,
-              title: 'Backup and Restore',
-              trailing: const Icon(Icons.backup, color: textColor),
+              title: 'Sign Out',
+              trailing: Icon(Icons.logout, color: textColor),
               onTap: () async {
-                await socialAuthProvider.handleGoogleSignIn();
-
-                final driveApi = await socialAuthProvider.getDriveApi();  // Updated to public method
-                if (driveApi == null) {
-                  // Handle the case where sign-in fails
-                  return;
+                await userProvider.signOut();
+                if (context.mounted) {
+                  Phoenix.rebirth(context); // Restart the app after sign out
                 }
-
-                // Example to back up data
-                await socialAuthProvider.backupToDrive(context, Provider.of<TallyProvider>(context, listen: false).tallies);
-
-                // Example to restore data
-                final restoredTallies = await socialAuthProvider.restoreFromDrive(context);
-                if (restoredTallies != null) {
-                  Provider.of<TallyProvider>(context, listen: false).setTallies(restoredTallies);
-                }
-
-                // Restart the app after restoring data
-                if (!mounted) return;
-                Phoenix.rebirth(context);
               },
               cardColor: cardColor,
               textColor: textColor,
@@ -143,58 +134,22 @@ class SettingsScreenState extends State<SettingsScreen> {
             _buildSettingCard(
               context,
               title: 'About',
-              trailing: const Icon(Icons.info, color: textColor),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) =>
-                    const AboutScreen(),
-                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                      const begin = Offset(0.0, 1.0);
-                      const end = Offset.zero;
-                      const curve = Curves.ease;
-
-                      final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-                      final offsetAnimation = animation.drive(tween);
-
-                      return SlideTransition(
-                        position: offsetAnimation,
-                        child: child,
-                      );
-                    },
-                  ),
-                );
-              },
+              trailing: Icon(Icons.info, color: textColor),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AboutScreen()),
+              ),
               cardColor: cardColor,
               textColor: textColor,
             ),
             _buildSettingCard(
               context,
               title: 'Help',
-              trailing: const Icon(Icons.help, color: textColor),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) =>
-                    const HelpScreen(),
-                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                      const begin = Offset(0.0, 1.0);
-                      const end = Offset.zero;
-                      const curve = Curves.ease;
-
-                      final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-                      final offsetAnimation = animation.drive(tween);
-
-                      return SlideTransition(
-                        position: offsetAnimation,
-                        child: child,
-                      );
-                    },
-                  ),
-                );
-              },
+              trailing: Icon(Icons.help, color: textColor),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const HelpScreen()),
+              ),
               cardColor: cardColor,
               textColor: textColor,
             ),
@@ -204,16 +159,23 @@ class SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSettingCard(BuildContext context,
-      {required String title,
-        required Widget trailing,
-        required Color cardColor,
-        required Color textColor,
-        VoidCallback? onTap}) {
+  Widget _buildSettingCard(
+    BuildContext context, {
+    required String title,
+    required Widget trailing,
+    required Color cardColor,
+    required Color textColor,
+    VoidCallback? onTap,
+  }) {
     return Card(
       color: cardColor,
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(
-        title: Text(title, style: TextStyle(color: textColor)),
+        title: Text(
+          title,
+          style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
+        ),
         trailing: trailing,
         onTap: onTap,
       ),

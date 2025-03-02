@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'screens/home_screen.dart';
 import 'screens/timer_screen.dart';
@@ -10,13 +11,41 @@ import 'providers/tally_provider.dart';
 import 'providers/user_provider.dart';
 import 'providers/theme_notifier.dart';
 import 'providers/notification_helper.dart';
-import 'providers/social_auth_provider.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:permission_handler/permission_handler.dart';
+import 'screens/login_screen.dart';
+import 'package:logging/logging.dart';
+import 'config.dart'; // Import the config file
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  
+  // Initialize logging
+  Logger.root.level = Level.ALL;
+  Logger.root.onRecord.listen((record) {
+    debugPrint('${record.level.name}: ${record.time}: ${record.message}');
+    if (record.error != null) {
+      debugPrint('Error: ${record.error}');
+    }
+    if (record.stackTrace != null) {
+      debugPrint('Stack trace:\n${record.stackTrace}');
+    }
+  });
+  
+  // Load environment variables
+  try {
+    await dotenv.load();
+  } catch (e) {
+    debugPrint('Error loading .env file: $e');
+    // Continue without .env file, we'll use hardcoded values from config.dart
+  }
+  
+  // Initialize Supabase
+  await Supabase.initialize(
+    url: AppConfig.supabaseUrl,
+    anonKey: AppConfig.supabaseAnonKey,
+  );
+  
   tz.initializeTimeZones();
   await _requestPermissions();
   await NotificationHelper().initializeNotifications();
@@ -26,7 +55,6 @@ void main() async {
       child: MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (context) => UserProvider()),
-          ChangeNotifierProvider(create: (context) => SocialAuthProvider()),
           ChangeNotifierProxyProvider<UserProvider, TallyProvider>(
             create: (context) => TallyProvider(context.read<UserProvider>()),
             update: (context, userProvider, tallyProvider) =>
@@ -64,6 +92,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeNotifier = Provider.of<ThemeNotifier>(context);
+    final userProvider = Provider.of<UserProvider>(context);
 
     return MaterialApp(
       title: 'Task Up',
@@ -74,21 +103,18 @@ class MyApp extends StatelessWidget {
           backgroundColor: const Color(0xFF0064A0),
           titleTextStyle: GoogleFonts.rubik(
             textStyle: const TextStyle(
-                color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),
+              color: Colors.white, 
+              fontSize: 20, 
+              fontWeight: FontWeight.w500
+            ),
           ),
           iconTheme: const IconThemeData(color: Colors.white),
         ),
-        bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          backgroundColor: const Color(0xFF0064A0),
-          selectedItemColor: Colors.amber[800],
-          unselectedItemColor: Colors.white,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF0064A0),
+          brightness: Brightness.light,
         ),
-        textTheme: TextTheme(
-          bodyLarge: GoogleFonts.rubik(
-              textStyle: const TextStyle(color: Colors.white)),
-          bodyMedium: GoogleFonts.rubik(
-              textStyle: const TextStyle(color: Colors.white)),
-        ),
+        useMaterial3: true,
       ),
       darkTheme: ThemeData(
         primaryColor: Colors.black,
@@ -97,29 +123,26 @@ class MyApp extends StatelessWidget {
           backgroundColor: Colors.black,
           titleTextStyle: GoogleFonts.rubik(
             textStyle: const TextStyle(
-                color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),
+              color: Colors.white, 
+              fontSize: 20, 
+              fontWeight: FontWeight.w500
+            ),
           ),
           iconTheme: const IconThemeData(color: Colors.white),
         ),
-        bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          backgroundColor: Colors.black,
-          selectedItemColor: Colors.amber[800],
-          unselectedItemColor: Colors.white,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.black,
+          brightness: Brightness.dark,
         ),
-        textTheme: TextTheme(
-          bodyLarge: GoogleFonts.rubik(
-              textStyle: const TextStyle(color: Colors.white)),
-          bodyMedium: GoogleFonts.rubik(
-              textStyle: const TextStyle(color: Colors.white)),
-        ),
+        useMaterial3: true,
       ),
       themeMode: themeNotifier.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      home: const HomeScreenWrapper(),
+      home: userProvider.supabaseUser == null ? LoginScreen() : const HomeScreenWrapper(),
       routes: {
         '/home': (context) => const MyHomePage(title: 'TaskMe'),
-        '/settings': (context) =>
-            const SettingsScreen(), // Use the SettingsScreen widget
+        '/settings': (context) => const SettingsScreen(),
         '/timer': (context) => const TimerScreen(),
+        '/login': (context) => LoginScreen(),
       },
     );
   }

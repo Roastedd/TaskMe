@@ -3,11 +3,11 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  firebase_auth
-  firebase_core
+  app_links
   flutter_timezone
   permission_handler_windows
   rive_common
+  url_launcher_windows
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

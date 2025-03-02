@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import '/models/tally.dart';
 import '/providers/user_provider.dart';
+import '../utils/supabase_client.dart';
 
 class TallyProvider with ChangeNotifier {
   List<Tally> _tallies = [];
@@ -282,5 +283,16 @@ class TallyProvider with ChangeNotifier {
     }
 
     return yearlyStats;
+  }
+
+  Future<void> saveTally(Tally tally) async {
+    try {
+      await supabase.from('tallies').upsert(
+        tally.toMap()..addAll({'user_id': supabase.auth.currentUser?.id}),
+      );
+      // Rest of your code...
+    } catch (e) {
+      // Error handling...
+    }
   }
 }

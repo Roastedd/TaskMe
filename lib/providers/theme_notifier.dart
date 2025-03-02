@@ -19,7 +19,7 @@ class ThemeNotifier with ChangeNotifier {
   void toggleTheme(bool isDark) {
     _isDarkMode = isDark;
     _saveToPrefs();
-    _logger.info('Theme changed');
+    _logger.info('Theme changed to: ${isDark ? 'dark' : 'light'}');
     notifyListeners();
   }
 
