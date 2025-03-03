@@ -171,8 +171,15 @@ class TallyProvider with ChangeNotifier {
 
   void resetTalliesIfNeeded(DateTime date) {
     bool anyTallyReset = false;
-    for (var tally in _tallies) {
+    for (var i = 0; i < _tallies.length; i++) {
+      Tally tally = _tallies[i];
       bool shouldReset = false;
+      
+      // Skip if the tally doesn't have a reset interval
+      if (tally.resetInterval.isEmpty) {
+        continue;
+      }
+      
       switch (tally.resetInterval) {
         case 'Day':
           shouldReset = isNextDay(tally.lastResetDate, date);
@@ -190,13 +197,23 @@ class TallyProvider with ChangeNotifier {
 
       if (shouldReset) {
         final dateString = DateFormat('yyyy-MM-dd').format(date);
+        // Only reset if we haven't already recorded a value for this date
         if (!tally.dailyValues.containsKey(dateString)) {
-          tally.dailyValues[dateString] = 0;
-          tally.lastResetDate = date;
+          // Create a new map to avoid modifying the existing one directly
+          final updatedDailyValues = Map<String, int>.from(tally.dailyValues);
+          updatedDailyValues[dateString] = 0;
+          
+          // Update the tally with the new values and reset date
+          _tallies[i] = tally.copyWith(
+            dailyValues: updatedDailyValues,
+            lastResetDate: date,
+          );
+          
           anyTallyReset = true;
         }
       }
     }
+    
     if (anyTallyReset) {
       _saveTallies();
       notifyListeners();
@@ -222,9 +239,20 @@ class TallyProvider with ChangeNotifier {
   }
 
   int _getWeekNumber(DateTime date) {
+    // Get the first day of the year
     final firstDayOfYear = DateTime(date.year, 1, 1);
+    
+    // Calculate the offset based on week start preference
+    int weekStartOffset = _weekStart == 'Sunday' ? 0 : 1;
+    
+    // Adjust the weekday based on week start preference
+    int adjustedWeekday = (date.weekday - weekStartOffset + 7) % 7;
+    
+    // Calculate the day of the year
     final dayOfYear = date.difference(firstDayOfYear).inDays + 1;
-    return ((dayOfYear - date.weekday + 10) / 7).floor();
+    
+    // Calculate the week number
+    return ((dayOfYear - adjustedWeekday + 10) / 7).floor();
   }
 
   void updateUserProvider(UserProvider userProvider) {
@@ -287,12 +315,38 @@ class TallyProvider with ChangeNotifier {
 
   Future<void> saveTally(Tally tally) async {
     try {
+      // Check if user is authenticated
+      final userId = supabase.auth.currentUser?.id;
+      if (userId == null) {
+        throw Exception('User not authenticated');
+      }
+      
+      // Update local state first
+      final index = _tallies.indexWhere((t) => t.id == tally.id);
+      if (index != -1) {
+        _tallies[index] = tally;
+      } else {
+        _tallies.add(tally);
+      }
+      
+      // Save to local storage
+      await _saveTallies();
+      
+      // Notify listeners about the change
+      notifyListeners();
+      
+      // Then save to Supabase
       await supabase.from('tallies').upsert(
-        tally.toMap()..addAll({'user_id': supabase.auth.currentUser?.id}),
+        tally.toMap()..addAll({'user_id': userId}),
       );
-      // Rest of your code...
+      
+      print('Tally saved successfully: ${tally.id}');
     } catch (e) {
-      // Error handling...
+      // Log the error
+      print('Error saving tally: $e');
+      
+      // Rethrow to allow the caller to handle it
+      rethrow;
     }
   }
 }

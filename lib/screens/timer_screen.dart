@@ -53,6 +53,10 @@ class TimerScreenState extends State<TimerScreen> with TickerProviderStateMixin 
     });
     _remaining = _duration;
 
+    // Cancel any existing notifications first
+    NotificationHelper().cancelNotification(0);
+    
+    // Schedule the notification for when the timer completes
     NotificationHelper().scheduleNotification(
       0,
       'Timer Finished',
@@ -86,8 +90,9 @@ class TimerScreenState extends State<TimerScreen> with TickerProviderStateMixin 
   void _stopTimer() {
     setState(() {
       _isRunning = false;
+      _controller.stop();
     });
-    _controller.stop();
+    // Make sure to cancel the notification when the timer is stopped
     NotificationHelper().cancelNotification(0);
   }
 

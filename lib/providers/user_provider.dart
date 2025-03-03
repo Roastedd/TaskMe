@@ -83,27 +83,35 @@ class UserProvider with ChangeNotifier {
       _isLoading = true;
       notifyListeners();
       
+      _logger.info('Starting Google sign-in process');
+      
       // Get the OAuth response from the auth service
       final oauthResponse = await _authService.signInWithGoogle();
       
       if (!oauthResponse.isSuccess) {
-        throw 'Failed to initiate Google sign-in';
+        _logger.severe('Failed to initiate Google sign-in: ${oauthResponse.error}');
+        throw 'Failed to initiate Google sign-in: ${oauthResponse.error ?? "Unknown error"}';
       }
       
-      // On iOS, the URL will be automatically opened by Supabase
+      _logger.info('Google sign-in initiated successfully');
+      
+      // On iOS and Android, the URL will be automatically opened by Supabase
       // For other platforms, we might need to manually launch the URL
-      if (!kIsWeb && !Platform.isIOS) {
+      if (!kIsWeb && !Platform.isIOS && !Platform.isAndroid) {
         _logger.info('Manually launching URL: ${oauthResponse.url}');
         final uri = Uri.parse(oauthResponse.url);
         if (await canLaunchUrl(uri)) {
           await launchUrl(uri, mode: LaunchMode.externalApplication);
         } else {
+          _logger.severe('Could not launch URL: ${oauthResponse.url}');
           throw 'Could not launch ${oauthResponse.url}';
         }
       }
       
       // The actual user will be set via the auth state change listener in _initUser
       // when the OAuth flow completes successfully
+      _logger.info('Waiting for auth state change from OAuth flow');
+      
     } catch (e) {
       _logger.severe('Google sign in failed', e);
       rethrow;

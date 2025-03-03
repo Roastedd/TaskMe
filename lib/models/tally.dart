@@ -109,35 +109,81 @@ class Tally {
   factory Tally.fromJson(String source) => Tally.fromMap(json.decode(source));
 
   factory Tally.fromMap(Map<String, dynamic> map) {
-    return Tally(
-      id: map['id'],
-      title: map['title'], // Updated property name
-      dailyValues: Map<String, int>.from(map['dailyValues']),
-      incrementValue: map['incrementValue'],
-      targetValue: map['targetValue'],
-      setTarget: map['setTarget'],
-      color: map['color'],
-      resetInterval: map['resetInterval'],
-      trackDays: List<bool>.from(map['trackDays']),
-      lastResetDate: DateTime.parse(map['lastResetDate']),
-      lastModified: DateTime.parse(map['lastModified']),
-      xp: map['xp'] ?? 0,
-      level: map['level'] ?? 1,
-      weeklyFrequency: map['weeklyFrequency'] ?? 7,
-      startDate: DateTime.parse(map['startDate']),
-      intervalFrequency: map['intervalFrequency'] ?? 1,
-      reminderTimes: (map['reminderTimes'] as List<dynamic>?)
-          ?.map((e) => DateTime.parse(e as String))
-          .toList(),
-      quote: map['quote'] ?? "Keep pushing forward!",
-      showQuoteInsteadOfTime: map['showQuoteInsteadOfTime'] ?? false,
-      durationOption: DurationOption.values.firstWhere(
-            (e) => e.toString() == 'DurationOption.${map['durationOption']}',
-        orElse: () => DurationOption.forever,
-      ),
-      customDuration: map['customDuration'] ?? 7,
-      unitType: map['unitType'] ?? 'Count',
-    );
+    try {
+      return Tally(
+        id: map['id'] ?? '',
+        title: map['title'] ?? 'Untitled', // Provide default for missing title
+        dailyValues: map['dailyValues'] != null 
+            ? Map<String, int>.from(map['dailyValues']) 
+            : <String, int>{},
+        incrementValue: map['incrementValue'] ?? 1,
+        targetValue: map['targetValue'] ?? 0,
+        setTarget: map['setTarget'] ?? false,
+        color: map['color'] ?? 0xFF0064A0, // Default blue color
+        resetInterval: map['resetInterval'] ?? '',
+        trackDays: map['trackDays'] != null 
+            ? List<bool>.from(map['trackDays']) 
+            : List.filled(7, true), // Default to all days
+        lastResetDate: map['lastResetDate'] != null 
+            ? DateTime.parse(map['lastResetDate']) 
+            : DateTime.now(),
+        lastModified: map['lastModified'] != null 
+            ? DateTime.parse(map['lastModified']) 
+            : DateTime.now(),
+        xp: map['xp'] ?? 0,
+        level: map['level'] ?? 1,
+        weeklyFrequency: map['weeklyFrequency'] ?? 7,
+        startDate: map['startDate'] != null 
+            ? DateTime.parse(map['startDate']) 
+            : DateTime.now(),
+        intervalFrequency: map['intervalFrequency'] ?? 1,
+        reminderTimes: (map['reminderTimes'] as List<dynamic>?)
+            ?.map((e) => DateTime.parse(e as String))
+            .toList(),
+        quote: map['quote'] ?? "Keep pushing forward!",
+        showQuoteInsteadOfTime: map['showQuoteInsteadOfTime'] ?? false,
+        durationOption: _parseDurationOption(map['durationOption']),
+        customDuration: map['customDuration'] ?? 7,
+        unitType: map['unitType'] ?? 'Count',
+      );
+    } catch (e) {
+      print('Error parsing Tally: $e');
+      // Return a default Tally object if parsing fails
+      return Tally(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        title: 'Error Tally',
+        incrementValue: 1,
+        targetValue: 0,
+        setTarget: false,
+        color: 0xFF0064A0,
+        resetInterval: '',
+        trackDays: List.filled(7, true),
+      );
+    }
+  }
+
+  // Helper method to safely parse DurationOption
+  static DurationOption _parseDurationOption(dynamic value) {
+    if (value == null) return DurationOption.forever;
+    
+    try {
+      if (value is String && value.startsWith('DurationOption.')) {
+        final enumString = value.split('.').last;
+        return DurationOption.values.firstWhere(
+          (e) => e.toString() == 'DurationOption.$enumString',
+          orElse: () => DurationOption.forever,
+        );
+      } else if (value is String) {
+        return DurationOption.values.firstWhere(
+          (e) => e.toString() == 'DurationOption.$value',
+          orElse: () => DurationOption.forever,
+        );
+      }
+    } catch (e) {
+      print('Error parsing DurationOption: $e');
+    }
+    
+    return DurationOption.forever;
   }
 
   Map<String, dynamic> toMap() {

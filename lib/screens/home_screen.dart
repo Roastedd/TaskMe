@@ -163,9 +163,25 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 itemBuilder: (context, index) {
                   String weekStart = Provider.of<TallyProvider>(context).weekStart;
                   int startDay = weekStart == 'Sunday' ? DateTime.sunday : DateTime.monday;
-                  DateTime startOfWeek = _currentDate.subtract(Duration(days: (_currentDate.weekday - startDay + 7) % 7));
+                  
+                  // Calculate the start of the week based on the current date and week start preference
+                  DateTime now = DateTime.now();
+                  DateTime startOfWeek = _currentDate.subtract(
+                    Duration(days: (_currentDate.weekday - startDay + 7) % 7)
+                  );
+                  
+                  // Calculate the date for this day in the week
                   DateTime date = startOfWeek.add(Duration(days: index));
-                  bool isSelected = _currentDate.day == date.day && _currentDate.month == date.month && _currentDate.year == date.year;
+                  
+                  // Check if this date is the selected date
+                  bool isSelected = _currentDate.year == date.year && 
+                                   _currentDate.month == date.month && 
+                                   _currentDate.day == date.day;
+                  
+                  // Check if this date is today
+                  bool isToday = now.year == date.year && 
+                                now.month == date.month && 
+                                now.day == date.day;
 
                   return AnimationConfiguration.staggeredList(
                     position: index,
@@ -184,7 +200,10 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               children: [
                                 Text(
                                   DateFormat('E').format(date),
-                                  style: const TextStyle(color: Colors.white),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
                                 Container(
@@ -192,12 +211,15 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   height: 30,
                                   alignment: Alignment.center,
                                   decoration: BoxDecoration(
-                                    color: isSelected ? Colors.orange : Colors.transparent,
+                                    color: isSelected ? Colors.orange : (isToday ? Colors.white.withOpacity(0.3) : Colors.transparent),
                                     shape: BoxShape.circle,
                                   ),
                                   child: Text(
                                     DateFormat('d').format(date),
-                                    style: const TextStyle(color: Colors.white),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                                    ),
                                   ),
                                 ),
                               ],
