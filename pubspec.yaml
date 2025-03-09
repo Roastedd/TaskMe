@@ -1,0 +1,107 @@
+name: taskme
+description: "A new Flutter project."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.1
+  google_fonts: ^6.2.1
+  uuid: ^4.4.0
+  intl: ^0.19.0
+
+  # Updated to 18.x
+  flutter_local_notifications: ^18.0.1
+
+  path_provider: ^2.1.2
+  cupertino_icons: ^1.0.6
+  fl_chart: ^0.70.0
+  numberpicker: ^2.1.2
+  timezone: ^0.9.2
+  permission_handler: ^11.3.1
+  smooth_page_indicator: ^1.2.1
+  flutter_svg: ^2.0.10
+  flutter_bloc: ^8.1.4
+  wheel_chooser: ^1.1.2
+  flutter_timezone: ^3.0.1
+  rive: ^0.13.1
+  flutter_animate: ^4.5.0
+  confetti: ^0.7.0
+  flutter_staggered_animations: ^1.1.1
+  http: ^1.2.0
+  flutter_phoenix: ^1.1.1
+  logging: ^1.2.0
+  shared_preferences: ^2.2.2
+  url_launcher: ^6.2.5
+
+  supabase_flutter: ^2.3.4
+  flutter_dotenv: ^5.1.0  # for environment variables
+  logger: ^1.0.0
+
+  # Add Riverpod for state management
+  flutter_riverpod: ^2.3.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  # You can also update this if you like:
+  flutter_lints: ^3.0.1
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/icon_fore.png"
+  adaptive_icon_background: "#000000"
+  adaptive_icon_foreground: "assets/icon/icon_fore.png"
+
+flutter:
+  uses-material-design: true
+
+  # Performance optimizations
+  generate: true # Enables code generation
+  
+  # Assets
+  assets:
+    - .env
+    - assets/
+    - assets/images/
+    - assets/icon/
+    - assets/google_logo.png
+    
+# Build configuration for Android
+android:
+  compileSdkVersion: 33
+  minSdkVersion: 21
+  targetSdkVersion: 33
+  buildToolsVersion: "30.0.3"
+  
+  defaultConfig:
+    minSdkVersion: 21
+    targetSdkVersion: 33
+    
+  buildTypes:
+    release:
+      shrinkResources: true
+      minifyEnabled: true
+      proguardFiles:
+        - proguard-rules.pro
+        
+# Build configuration for iOS
+ios:
+  bundleIdentifier: com.yourdomain.taskme
+  deploymentTarget: "12.0"
+  
+  buildSettings:
+    ENABLE_BITCODE: NO
+    SWIFT_VERSION: 5.0
+    
+    release:
+      LLVM_LTO: YES # Link-time optimization
+      GCC_OPTIMIZATION_LEVEL: 3
+      SWIFT_OPTIMIZATION_LEVEL: -O
+      SWIFT_COMPILATION_MODE: wholemodule

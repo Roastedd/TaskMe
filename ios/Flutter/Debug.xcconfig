@@ -1,0 +1,5 @@
+#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"
+#include "Generated.xcconfig"
+
+// Add debug configuration
+GCC_PREPROCESSOR_DEFINITIONS = DEBUG=1 RIVE_ENABLE_DEBUG_RENDERING=1 $(inherited)
