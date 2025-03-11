@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/tally.dart';
 import '../providers/tally_provider.dart';
+import '../config/theme_config.dart';
 
 class TallyForm extends StatefulWidget {
   final Tally? initialData;
@@ -31,30 +33,39 @@ class _TallyFormState extends State<TallyForm> {
   String? _quote;
   bool _showQuoteInsteadOfTime = false;
   int? _customDuration;
-  int _color = Colors.blue.value;
+  int _color = Colors.orange.value;
+
+  final List<Color> _colorOptions = [
+    Colors.orange,
+    Colors.blue,
+    Colors.red,
+    Colors.green,
+    Colors.purple,
+    Colors.pink,
+    Colors.teal,
+    Colors.amber,
+  ];
 
   @override
   void initState() {
     super.initState();
     if (widget.initialData != null) {
       _titleController.text = widget.initialData!.title;
+      _targetController.text = widget.initialData!.targetValue.toString();
       _incrementController.text = widget.initialData!.incrementValue.toString();
-      if (widget.initialData!.setTarget) {
-        _hasTarget = true;
-        _targetController.text = widget.initialData!.targetValue.toString();
-      }
+      _hasTarget = widget.initialData!.setTarget;
       _resetInterval = widget.initialData!.resetInterval;
-      _trackDays = List.from(widget.initialData!.trackDays);
+      _trackDays = widget.initialData!.trackDays;
       _goalType = widget.initialData!.goalType;
       _unitType = widget.initialData!.unitType;
       _durationOption = widget.initialData!.durationOption;
       _weeklyFrequency = widget.initialData!.weeklyFrequency;
       _intervalFrequency = widget.initialData!.intervalFrequency;
-      _reminderTimes = List.from(widget.initialData!.reminderTimes);
+      _reminderTimes = widget.initialData!.reminderTimes;
       _quote = widget.initialData!.quote;
       _showQuoteInsteadOfTime = widget.initialData!.showQuoteInsteadOfTime;
       _customDuration = widget.initialData!.customDuration;
-      _color = widget.initialData?.color ?? Colors.blue.value;
+      _color = widget.initialData!.color;
     }
   }
 
@@ -119,6 +130,202 @@ class _TallyFormState extends State<TallyForm> {
     }
   }
 
+  Widget _buildFrequencySelector() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Frequency',
+            style: GoogleFonts.poppins(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildFrequencyButton('Daily', ResetInterval.daily),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildFrequencyButton('Weekly', ResetInterval.weekly),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child:
+                    _buildFrequencyButton('Interval', ResetInterval.interval),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Pick Days',
+            style: GoogleFonts.poppins(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+                .asMap()
+                .entries
+                .map((entry) {
+              return _buildDayButton(entry.value, entry.key);
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFrequencyButton(String label, ResetInterval interval) {
+    final isSelected = _resetInterval == interval;
+    return ElevatedButton(
+      onPressed: () {
+        setState(() => _resetInterval = interval);
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: isSelected ? Colors.orange : Colors.grey[800],
+        foregroundColor: Colors.white,
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.poppins(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDayButton(String label, int index) {
+    final isSelected = _trackDays[index];
+    return ElevatedButton(
+      onPressed: () {
+        setState(() => _trackDays[index] = !_trackDays[index]);
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: isSelected ? Colors.orange : Colors.grey[800],
+        foregroundColor: Colors.white,
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.poppins(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildColorPicker() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Color',
+            style: GoogleFonts.poppins(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: _colorOptions.map((color) {
+              return GestureDetector(
+                onTap: () {
+                  setState(() => _color = color.value);
+                },
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: _color == color.value
+                          ? Colors.white
+                          : Colors.transparent,
+                      width: 3,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSection(String title, {required Widget child}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: GoogleFonts.poppins(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+              if (title == 'Section')
+                IconButton(
+                  icon: const Icon(Icons.add, color: Colors.white),
+                  onPressed: () {
+                    // Handle section add
+                  },
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          child,
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -128,149 +335,146 @@ class _TallyFormState extends State<TallyForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextFormField(
+            TextField(
               controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Title',
-                hintText: 'Enter tally title',
-              ),
-              validator: Tally.validateTitle,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _incrementController,
-              decoration: const InputDecoration(
-                labelText: 'Increment Value',
-                hintText: 'Enter increment value (1-100)',
-              ),
-              keyboardType: TextInputType.number,
-              validator: (value) =>
-                  Tally.validateIncrementValue(int.tryParse(value ?? '')),
-            ),
-            const SizedBox(height: 16),
-            SwitchListTile(
-              title: const Text('Set Target'),
-              value: _hasTarget,
-              onChanged: (value) {
-                setState(() => _hasTarget = value);
-              },
-            ),
-            if (_hasTarget) ...[
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _targetController,
-                decoration: const InputDecoration(
-                  labelText: 'Target Value',
-                  hintText: 'Enter target number',
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: 'Run',
+                hintStyle: TextStyle(color: Colors.grey[400]),
+                filled: true,
+                fillColor: Colors.grey[800],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
                 ),
-                keyboardType: TextInputType.number,
-                validator: (value) =>
-                    Tally.validateTargetValue(int.tryParse(value ?? '')),
-              ),
-            ],
-            const SizedBox(height: 16),
-            DropdownButtonFormField<ResetInterval>(
-              value: _resetInterval,
-              decoration: const InputDecoration(
-                labelText: 'Reset Interval',
-              ),
-              items: ResetInterval.values.map((interval) {
-                return DropdownMenuItem(
-                  value: interval,
-                  child: Text(interval.toString().split('.').last),
-                );
-              }).toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() => _resetInterval = value);
-                }
-              },
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<GoalType>(
-              value: _goalType,
-              decoration: const InputDecoration(
-                labelText: 'Goal Type',
-              ),
-              items: GoalType.values.map((type) {
-                return DropdownMenuItem(
-                  value: type,
-                  child: Text(type.toString().split('.').last),
-                );
-              }).toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() => _goalType = value);
-                }
-              },
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<UnitType>(
-              value: _unitType,
-              decoration: const InputDecoration(
-                labelText: 'Unit Type',
-              ),
-              items: UnitType.values.map((type) {
-                return DropdownMenuItem(
-                  value: type,
-                  child: Text(type.displayName),
-                );
-              }).toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() => _unitType = value);
-                }
-              },
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<DurationOption>(
-              value: _durationOption,
-              decoration: const InputDecoration(
-                labelText: 'Duration Option',
-              ),
-              items: DurationOption.values.map((option) {
-                return DropdownMenuItem(
-                  value: option,
-                  child: Text(option.displayName),
-                );
-              }).toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() => _durationOption = value);
-                }
-              },
-            ),
-            if (_durationOption == DurationOption.custom) ...[
-              const SizedBox(height: 16),
-              TextFormField(
-                initialValue: _customDuration?.toString(),
-                decoration: const InputDecoration(
-                  labelText: 'Custom Duration (days)',
-                  hintText: 'Enter number of days',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white),
+                  onPressed: () => _titleController.clear(),
                 ),
-                keyboardType: TextInputType.number,
-                validator: (value) => Tally.validateCustomDuration(
-                  _durationOption,
-                  int.tryParse(value ?? ''),
-                ),
-                onChanged: (value) {
-                  setState(() => _customDuration = int.tryParse(value));
-                },
               ),
-            ],
+            ),
             const SizedBox(height: 24),
+            _buildFrequencySelector(),
+            const SizedBox(height: 24),
+            _buildSection(
+              'Goal',
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Achieve it all',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right, color: Colors.white),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildSection(
+              'Start Date',
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Mar 10',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right, color: Colors.white),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildSection(
+              'Goal Days',
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Forever',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right, color: Colors.white),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildSection(
+              'Section',
+              child: Wrap(
+                spacing: 8,
+                children: [
+                  _buildSectionChip('g', isSelected: true),
+                  _buildSectionChip('Afternoon'),
+                  _buildSectionChip('Night'),
+                  _buildSectionChip('Others', isSelected: true),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildSection(
+              'Reminder',
+              child: Row(
+                children: [
+                  Icon(Icons.add, color: Colors.orange[400]),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Add',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      color: Colors.orange[400],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            _buildColorPicker(),
+            const SizedBox(height: 32),
             ElevatedButton(
               onPressed: _isLoading ? null : _saveTally,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
               child: _isLoading
                   ? const SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Save'),
+                  : const Text('Save Habit'),
             ),
+            const SizedBox(height: 32),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionChip(String label, {bool isSelected = false}) {
+    return FilterChip(
+      selected: isSelected,
+      label: Text(label),
+      onSelected: (_) {},
+      backgroundColor: Colors.grey[800],
+      selectedColor: Colors.orange,
+      labelStyle: GoogleFonts.poppins(
+        color: Colors.white,
+        fontSize: 14,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
       ),
     );
   }

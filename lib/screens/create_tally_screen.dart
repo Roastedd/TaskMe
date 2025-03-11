@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '/models/tally.dart';
 import '/providers/tally_provider.dart';
 import '/widgets/tally_form.dart';
 import 'package:uuid/uuid.dart';
 import '/providers/notification_helper.dart';
 import '/screens/home_screen.dart'; // Import your home screen
+import '/config/theme_config.dart';
 
 class CreateTallyScreen extends StatefulWidget {
   const CreateTallyScreen({super.key});
@@ -33,23 +35,22 @@ class _CreateTallyScreenState extends State<CreateTallyScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Create Habit'),
-        actions: [
-          TextButton(
-            onPressed: _isSaving ? null : _saveForm,
-            child: _isSaving
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
-                    ),
-                  )
-                : const Text('Save', style: TextStyle(color: Colors.orange)),
+        backgroundColor: Colors.black,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(
+          'New Habit',
+          style: GoogleFonts.poppins(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
           ),
-        ],
+        ),
       ),
       body: TallyForm(
         key: _formKey,
@@ -100,7 +101,13 @@ class _CreateTallyScreenState extends State<CreateTallyScreen> {
 
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Habit created successfully!')),
+                SnackBar(
+                  content: Text(
+                    'Habit created successfully!',
+                    style: GoogleFonts.poppins(),
+                  ),
+                  backgroundColor: AppColors.success,
+                ),
               );
               Navigator.pushAndRemoveUntil(
                 context,
@@ -112,7 +119,12 @@ class _CreateTallyScreenState extends State<CreateTallyScreen> {
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                    content: Text('Error creating habit: ${e.toString()}')),
+                  content: Text(
+                    'Error creating habit: ${e.toString()}',
+                    style: GoogleFonts.poppins(),
+                  ),
+                  backgroundColor: AppColors.error,
+                ),
               );
             }
           } finally {
@@ -121,6 +133,39 @@ class _CreateTallyScreenState extends State<CreateTallyScreen> {
             }
           }
         },
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: ElevatedButton(
+            onPressed: _isSaving ? null : _saveForm,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+            child: _isSaving
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : Text(
+                    'Save',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+          ),
+        ),
       ),
     );
   }

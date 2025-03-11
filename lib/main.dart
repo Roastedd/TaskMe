@@ -9,6 +9,7 @@ import 'providers/tally_provider.dart';
 import 'providers/user_provider.dart';
 import 'providers/theme_notifier.dart';
 import 'package:taskme/screens/splash_screen.dart';
+import 'config/theme_config.dart';
 
 // Global key for navigator to use in error handling
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -84,11 +85,10 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'TaskMe',
           debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-            brightness:
-                themeNotifier.isDarkMode ? Brightness.dark : Brightness.light,
-          ),
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode:
+              themeNotifier.isDarkMode ? ThemeMode.dark : ThemeMode.light,
           home: const SplashScreen(),
           routes: {'/home': (context) => const HomeScreen()},
         );

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '/models/tally.dart';
-import '/widgets/tally_form.dart';
 import '/providers/tally_provider.dart';
+import '/widgets/tally_form.dart';
 import '/providers/notification_helper.dart';
-import '/screens/home_screen.dart'; // Import your home screen
+import '/screens/home_screen.dart';
+import '/config/theme_config.dart';
 
 class EditTallyScreen extends StatefulWidget {
   final Tally tally;
@@ -33,22 +35,42 @@ class _EditTallyScreenState extends State<EditTallyScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Habit'),
+        title: Text(
+          'Edit Habit',
+          style: GoogleFonts.poppins(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: _isSaving ? null : _saveForm,
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.accent,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+            ),
             child: _isSaving
-                ? const SizedBox(
+                ? SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        theme.colorScheme.primary,
+                      ),
                     ),
                   )
-                : const Text('Save', style: TextStyle(color: Colors.orange)),
+                : Text(
+                    'Save',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
           ),
         ],
       ),
@@ -100,7 +122,13 @@ class _EditTallyScreenState extends State<EditTallyScreen> {
 
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Habit updated successfully!')),
+                SnackBar(
+                  content: Text(
+                    'Habit updated successfully!',
+                    style: GoogleFonts.poppins(),
+                  ),
+                  backgroundColor: AppColors.success,
+                ),
               );
               Navigator.pushAndRemoveUntil(
                 context,
@@ -112,7 +140,12 @@ class _EditTallyScreenState extends State<EditTallyScreen> {
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                    content: Text('Error updating habit: ${e.toString()}')),
+                  content: Text(
+                    'Error updating habit: ${e.toString()}',
+                    style: GoogleFonts.poppins(),
+                  ),
+                  backgroundColor: AppColors.error,
+                ),
               );
             }
           } finally {
