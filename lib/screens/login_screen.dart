@@ -4,7 +4,6 @@ import '../providers/user_provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:logging/logging.dart';
-import '../providers/theme_notifier.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -482,10 +481,5 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-  Widget _buildSocialLoginButton(BuildContext context) {
-    final themeNotifier = Provider.of<ThemeNotifier>(context);
-    return Container(
-        // ... rest of the code ...
-        );
-  }
+
 }

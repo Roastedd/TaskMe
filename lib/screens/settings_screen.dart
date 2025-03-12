@@ -1,210 +1,204 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/theme_notifier.dart';
 import '../providers/user_provider.dart';
-import '../providers/tally_provider.dart';
-import '../widgets/about_screen.dart';
-import '../screens/help_screen.dart';
-import 'package:flutter_phoenix/flutter_phoenix.dart';
+import '../config/theme_config.dart';
+import '../config/styles.dart';
+import '../widgets/common_widgets.dart';
+import 'help_screen.dart';
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
-
-  @override
-  SettingsScreenState createState() => SettingsScreenState();
-}
-
-class SettingsScreenState extends State<SettingsScreen> {
-  late String weekStart = 'Sunday'; // Set default value
-  bool notificationsEnabled = true;
-  bool soundEnabled = true;
-  bool _isSigningOut = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        setState(() {
-          weekStart =
-              Provider.of<TallyProvider>(context, listen: false).weekStart;
-        });
-      }
-    });
-  }
-
-  Future<void> _handleSignOut() async {
-    setState(() => _isSigningOut = true);
-    try {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      await userProvider.signOut();
-      if (mounted) {
-        Phoenix.rebirth(context);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sign out failed: ${e.toString()}')),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isSigningOut = false);
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     final themeNotifier = Provider.of<ThemeNotifier>(context);
-    final isDarkMode = themeNotifier.isDarkMode;
-    final textColor = isDarkMode ? Colors.white : Colors.black;
-    final dropdownColor = isDarkMode ? Colors.grey[800] : Colors.white;
-    final backgroundColor = isDarkMode ? Colors.black : const Color(0xFF0064A0);
-    final cardColor = isDarkMode ? Colors.grey[850]! : const Color(0xFF0088CC);
+    final userProvider = Provider.of<UserProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Settings', style: TextStyle(color: textColor)),
-        backgroundColor: backgroundColor,
-        iconTheme: IconThemeData(color: textColor),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: CommonWidgets.buildAppBar(
+          title: 'Settings',
+          centerTitle: true,
+        ),
       ),
-      backgroundColor: backgroundColor,
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
+      body: SingleChildScrollView(
+        child: Column(
           children: [
-            _buildSettingCard(
-              context,
-              title: 'Dark Mode',
-              trailing: Switch(
-                value: isDarkMode,
-                onChanged: (value) {
-                  themeNotifier.toggleTheme(value);
-                },
-              ),
-              cardColor: cardColor,
-              textColor: textColor,
-            ),
-            _buildSettingCard(
-              context,
-              title: 'Week Start',
-              trailing: DropdownButton<String>(
-                value: weekStart,
-                dropdownColor: dropdownColor,
-                style: TextStyle(color: textColor),
-                items: ['Sunday', 'Monday'].map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      weekStart = value;
-                      Provider.of<TallyProvider>(context, listen: false)
-                          .setWeekStart(value);
-                    });
-                  }
-                },
-              ),
-              cardColor: cardColor,
-              textColor: textColor,
-            ),
-            _buildSettingCard(
-              context,
-              title: 'Notifications',
-              trailing: Switch(
-                value: notificationsEnabled,
-                onChanged: (value) {
-                  setState(() {
-                    notificationsEnabled = value;
-                  });
-                },
-              ),
-              cardColor: cardColor,
-              textColor: textColor,
-            ),
-            _buildSettingCard(
-              context,
-              title: 'Sound',
-              trailing: Switch(
-                value: soundEnabled,
-                onChanged: (value) {
-                  setState(() {
-                    soundEnabled = value;
-                  });
-                },
-              ),
-              cardColor: cardColor,
-              textColor: textColor,
-            ),
-            _buildSettingCard(
-              context,
-              title: 'Sign Out',
-              trailing: _isSigningOut
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(Colors.orange),
+            AppStyles.buildSettingsSection(
+              title: 'APPEARANCE',
+              children: [
+                AppStyles.buildSettingsItem(
+                  icon: Icons.dark_mode,
+                  title: 'Dark Mode',
+                  trailing: Switch(
+                    value: themeNotifier.isDarkMode,
+                    onChanged: (value) => themeNotifier.toggleTheme(value),
+                  ),
+                ),
+              ],
+            ).animate().fadeIn(duration: 300.ms).slideX(
+                  begin: -0.2,
+                  end: 0,
+                  duration: 300.ms,
+                  curve: Curves.easeOutQuad,
+                ),
+            AppStyles.buildSettingsSection(
+              title: 'ACCOUNT',
+              children: [
+                AppStyles.buildSettingsItem(
+                  icon: Icons.person,
+                  title: 'Profile',
+                  subtitle: userProvider.supabaseUser?.email ?? 'Not signed in',
+                  onTap: () {
+                    // Handle profile tap
+                  },
+                ),
+                AppStyles.buildSettingsItem(
+                  icon: Icons.notifications,
+                  title: 'Notifications',
+                  onTap: () {
+                    // Handle notifications tap
+                  },
+                ),
+                AppStyles.buildSettingsItem(
+                  icon: Icons.security,
+                  title: 'Privacy',
+                  onTap: () {
+                    // Handle privacy tap
+                  },
+                ),
+              ],
+            ).animate().fadeIn(duration: 300.ms, delay: 100.ms).slideX(
+                  begin: -0.2,
+                  end: 0,
+                  duration: 300.ms,
+                  curve: Curves.easeOutQuad,
+                ),
+            AppStyles.buildSettingsSection(
+              title: 'SUPPORT',
+              children: [
+                AppStyles.buildSettingsItem(
+                  icon: Icons.help,
+                  title: 'Help & FAQ',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const HelpScreen(),
                       ),
-                    )
-                  : Icon(Icons.logout, color: textColor),
-              onTap: _isSigningOut ? null : _handleSignOut,
-              cardColor: cardColor,
-              textColor: textColor,
-            ),
-            _buildSettingCard(
-              context,
-              title: 'About',
-              trailing: Icon(Icons.info, color: textColor),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AboutScreen()),
-              ),
-              cardColor: cardColor,
-              textColor: textColor,
-            ),
-            _buildSettingCard(
-              context,
-              title: 'Help',
-              trailing: Icon(Icons.help, color: textColor),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const HelpScreen()),
-              ),
-              cardColor: cardColor,
-              textColor: textColor,
-            ),
+                    );
+                  },
+                ),
+                AppStyles.buildSettingsItem(
+                  icon: Icons.feedback,
+                  title: 'Send Feedback',
+                  onTap: () {
+                    // Handle feedback tap
+                  },
+                ),
+                AppStyles.buildSettingsItem(
+                  icon: Icons.info,
+                  title: 'About',
+                  onTap: () {
+                    _showAboutDialog(context);
+                  },
+                ),
+              ],
+            ).animate().fadeIn(duration: 300.ms, delay: 200.ms).slideX(
+                  begin: -0.2,
+                  end: 0,
+                  duration: 300.ms,
+                  curve: Curves.easeOutQuad,
+                ),
+            AppStyles.buildSettingsSection(
+              title: 'DANGER ZONE',
+              children: [
+                AppStyles.buildSettingsItem(
+                  icon: Icons.logout,
+                  title: 'Sign Out',
+                  onTap: () => _showSignOutDialog(context),
+                  showDivider: false,
+                ),
+              ],
+            ).animate().fadeIn(duration: 300.ms, delay: 300.ms).slideX(
+                  begin: -0.2,
+                  end: 0,
+                  duration: 300.ms,
+                  curve: Curves.easeOutQuad,
+                ),
+            const SizedBox(height: AppStyles.spacing24),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSettingCard(
-    BuildContext context, {
-    required String title,
-    required Widget trailing,
-    required Color cardColor,
-    required Color textColor,
-    VoidCallback? onTap,
-  }) {
-    return Card(
-      color: cardColor,
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      child: ListTile(
+  Future<void> _showSignOutDialog(BuildContext context) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
         title: Text(
-          title,
-          style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
+          'Sign Out',
+          style: Theme.of(context).textTheme.titleLarge,
         ),
-        trailing: trailing,
-        onTap: onTap,
+        content: Text(
+          'Are you sure you want to sign out?',
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              userProvider.signOut();
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+            ),
+            child: const Text('Sign Out'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAboutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          'About TaskMe',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Version 1.0.0',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            const SizedBox(height: AppStyles.spacing8),
+            Text(
+              'TaskMe is your personal task management companion, designed to help you stay organized and productive.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
       ),
     );
   }
